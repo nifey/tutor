@@ -1,0 +1,8 @@
+[package]
+name = "tutor"
+version = "0.1.0"
+authors = ["Abdun Nihaal <abdun.nihaal@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+clap = "2.33.1"
