@@ -1,0 +1,30 @@
+# Sample tutorial to demonstrate the use of tutor
+title = "Rust tutorial"
+version = "0.1"
+instructions = """
+Hello, Welcome to this tutorial on learning the basics of Rust
+
+In this tutorial you will learn the very basics of Rust programming
+language.
+
+To view these instructions again type:
+tutor instruction
+"""
+
+[[sections]]
+  title = "Introduction to Rust"
+
+  [[sections.lessons]]
+  title = "Hello world!"
+  file = "lessons/section1/lesson1"
+
+[[sections]]
+  title = "Introduction to Rust 2"
+
+  [[sections.lessons]]
+  title = "Hello World! 2.1"
+  file = "lessons/section2/lesson1"
+
+  [[sections.lessons]]
+  title = "Hello world! 2.2"
+  file = "lessons/section2/lesson2"

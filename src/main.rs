@@ -1,8 +1,13 @@
 extern crate clap;
-use clap::{App, Arg, SubCommand};
-use std::fs::File;
 
-mod parse;
+mod index;
+mod info;
+mod stat;
+mod util;
+
+use clap::{App, Arg, SubCommand};
+use info::Info;
+use stat::Stat;
 
 fn main() {
     let matches = App::new("Tutor")
@@ -18,6 +23,11 @@ fn main() {
                         .help("section that you want to list")
                         .index(1),
                 ),
+        )
+        .subcommand(
+            SubCommand::with_name("instruction")
+                .alias("i")
+                .about("Gives introductary instructions about the tutorial"),
         )
         .subcommand(
             SubCommand::with_name("check")
@@ -62,9 +72,26 @@ fn main() {
         )
         .get_matches();
 
-    if let Ok(info_file) = File::open("tutorinfo.toml") {
+    let info: Info = info::read_tutorinfo();
+    let mut stat: Stat;
+    let read_option = stat::read_tutorstat();
+    if read_option.is_none() {
+        stat = stat::new(
+            info.get_tutorial_version(),
+            "1.1".to_string(),
+            info.get_total_lessons(),
+        );
+        println!("{}", info.get_instructions());
     } else {
-        println!("Run tutor from a tutorial directory containing tutorinfo.toml file");
+        stat = read_option.unwrap();
+    }
+
+    let current_file: String;
+    let lesson_file_result = info.get_lesson_file(stat.get_current_lesson());
+    if lesson_file_result.is_ok() {
+        current_file = lesson_file_result.unwrap();
+    } else {
+        println!("{}", lesson_file_result.err().unwrap());
         return;
     }
 
@@ -72,17 +99,29 @@ fn main() {
         let section_str = cmd_matches.value_of("section").unwrap_or("");
     }
 
+    if let Some(cmd_matches) = matches.subcommand_matches("instruction") {
+        println!("{}", info.get_instructions());
+    }
+
     if let Some(cmd_matches) = matches.subcommand_matches("check") {
         let file = cmd_matches.value_of("file").unwrap();
-        let current_file = File::open("lessons/section1/lesson1").unwrap();
-        if let Ok(shell_script) = parse::get_section(&current_file, "check") {
-            if parse::check(shell_script, file) {
+        if let Ok(shell_script) = util::get_section(&current_file, "check") {
+            if util::check(shell_script, file) {
                 println!("Correct");
                 print!(
                     "{}",
-                    parse::get_section(&current_file, "solution")
+                    util::get_section(&current_file, "solution")
                         .unwrap_or("No solution text for this lesson".to_string())
                 );
+                //TODO Add to finished tasks in the stat structure
+                if let Some(next_lesson) =
+                    info.get_next_lesson(index::new_from_string(stat.get_current_lesson()).unwrap())
+                {
+                    stat.set_current_lesson(next_lesson);
+                } else {
+                    // TODO Check for unfinished tasks before congratulating
+                    println!("Congratulations! you have completed the tutorial");
+                }
             } else {
                 println!("Incorrect. Try again");
             }
@@ -90,32 +129,39 @@ fn main() {
     }
 
     if let Some(cmd_matches) = matches.subcommand_matches("lesson") {
-        let current_file = File::open("lessons/section1/lesson1").unwrap();
         let lesson_index = cmd_matches.value_of("lesson_index").unwrap_or("");
         print!(
             "{}",
-            parse::get_section(&current_file, "lesson")
+            util::get_section(&current_file, "lesson")
                 .unwrap_or("No help text for this lesson".to_string())
         );
     }
 
     if let Some(cmd_matches) = matches.subcommand_matches("task") {
-        let current_file = File::open("lessons/section1/lesson1").unwrap();
         let lesson_index = cmd_matches.value_of("lesson_index").unwrap_or("");
         print!(
             "{}",
-            parse::get_section(&current_file, "task")
+            util::get_section(&current_file, "task")
                 .unwrap_or("No task for this lesson".to_string())
         );
     }
 
     if let Some(cmd_matches) = matches.subcommand_matches("hint") {
-        let current_file = File::open("lessons/section1/lesson1").unwrap();
         let next = cmd_matches.value_of("section").is_some();
-        print!(
-            "{}",
-            parse::get_section(&current_file, "hint")
-                .unwrap_or("No hint for this lesson".to_string())
-        );
+        //TODO get the number of hints used from tutorstats
+        //Also update when next is set
+        let num_hints = 5;
+        if let Ok(hints) = util::get_section(&current_file, "hint") {
+            let (text, hints_read) =
+                util::get_n_hints(hints, num_hints).unwrap_or(("".to_string(), 0));
+            print!("{}", text);
+            if hints_read < num_hints {
+                println!("Only {} hints available for this task", hints_read);
+            }
+        } else {
+            println!("No hints for this task");
+        }
     }
+
+    stat::write_tutorstat(stat);
 }

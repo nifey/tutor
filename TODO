@@ -1,0 +1,17 @@
+1. Code highlighting using syntect
+   Check cobalt on how it uses syntect
+2. Should we just use pretty print
+3. Use colorful crate to make it ... well colorful
+4. Better naming
+5. How do we update the stats when the tutorial gets changed
+6. Support for sub sections
+7. Add documentation
+8. Add tests
+9. Add a way to test if the solutions work correctly
+10. Do we need initialization for tutorials
+11. Better error messages
+12. Use index in Stat and implement serialize and deserialize for index
+13. Better example tutorial
+14. List completed tasks along with finished task information
+15. Use version numbers properly
+16. Add functionality to arbitrarily jump to a lesson and continue from there

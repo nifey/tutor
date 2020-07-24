@@ -1,0 +1,60 @@
+===lesson
+Lesson 2.1
+Just like in C, In Rust, the execution starts in the main function.
+Functions in Rust are declared as:
+
+==code
+fn <function_name> (<argument_list>) -> <return type> {
+}
+==code
+
+So we can define the main function as 
+
+==code
+fn main() {
+}
+==code
+
+To print to the standard output we use the println! macro.
+The ! symbol after it's name indicate that it is a macro.
+
+To print a string using println!, we use
+
+==code
+println!("Hello World");
+==code
+
+===task
+Write a hello world program in Rust that prints the following string
+Hello World again!
+
+To check your file use 
+tutor check your_file.rs
+===hints
+==hint
+Hint 1:
+
+To compile your code use
+rustc your_file.rs
+
+==hint
+Hint 2:
+
+Second hint
+
+==hint
+Hint 3:
+
+Third hint
+
+===solution
+Awesome. You have just written your first Rust program
+
+==code
+fn main() {
+	println!("Hello World again!");
+}
+==code
+
+===check
+bash lessons/scripts/check.sh <<file>> lessons/section2/lesson1.out
